@@ -1,0 +1,127 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "intern01",
+      "password": "1",
+      "role": "Intern",
+      "email": "intern01@example.com"
+    },
+    {
+      "id": 2,
+      "username": "admin01",
+      "password": "a2",
+      "role": "Admin",
+      "email": "admin01@example.com"
+    },
+    {
+      "id": 3,
+      "username": "intern02",
+      "password": "2",
+      "role": "Intern",
+      "email": "intern02@example.com"
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "userId": 1,
+      "content": "I want to know how to implement Redux in my project.",
+      "isAnswered": true,
+      "isDeleted": false
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "content": "Can someone explain what React Hooks are?",
+      "isAnswered": false,
+      "isDeleted": false
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "content": "What is the difference between useState and useEffect?",
+      "isAnswered": true,
+      "isDeleted": false
+    },
+    {
+      "id": 4,
+      "userId": 3,
+      "content": "How do you handle form validation in React?",
+      "isAnswered": false,
+      "isDeleted": false
+    },
+    {
+      "id": 5,
+      "userId": 1,
+      "content": "What is the context API in React?",
+      "isAnswered": true,
+      "isDeleted": false
+    },
+    {
+      "id": 6,
+      "userId": 3,
+      "content": "How to manage side effects in React?",
+      "isAnswered": false,
+      "isDeleted": false
+    }
+  ],
+  "answers": [
+    {
+      "id": 1,
+      "questionId": 1,
+      "userId": 2,
+      "content": "Redux is a state management tool. You can implement it by following the official documentation."
+    },
+    {
+      "id": 2,
+      "questionId": 2,
+      "userId": 3,
+      "content": "React Hooks are functions that let you use state and other React features without writing a class."
+    },
+    {
+      "id": 3,
+      "questionId": 3,
+      "userId": 2,
+      "content": "useState is for managing state, while useEffect is for performing side effects."
+    },
+    {
+      "id": 4,
+      "questionId": 5,
+      "userId": 1,
+      "content": "The Context API is a way to manage global state in React."
+    }
+  ],
+  "likes": [
+    {
+      "questionId": 1,
+      "likesCount": 2,
+      "likedBy": [1, 3]
+    },
+    {
+      "questionId": 2,
+      "likesCount": 1,
+      "likedBy": [2]
+    },
+    {
+      "questionId": 3,
+      "likesCount": 3,
+      "likedBy": [1, 2, 3]
+    },
+    {
+      "questionId": 4,
+      "likesCount": 0,
+      "likedBy": []
+    },
+    {
+      "questionId": 5,
+      "likesCount": 1,
+      "likedBy": [2]
+    },
+    {
+      "questionId": 6,
+      "likesCount": 1,
+      "likedBy": [1]
+    }
+  ]
+}
