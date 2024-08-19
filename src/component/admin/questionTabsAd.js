@@ -20,6 +20,7 @@ const QuestionsTabAd = () => {
   const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const [unansweredQuestions, setUnansweredQuestions] = useState([]);
   const [likes, setLikes] = useState([]);
+  const [answers, setAnswer] = useState([]);
 
   useEffect(() => {
     // Lấy dữ liệu likes từ Mock API
@@ -31,8 +32,16 @@ const QuestionsTabAd = () => {
         console.error("Error fetching likes data:", error);
       }
     };
-
+    const fetchAnswer = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/answers`);
+        setAnswer(response.data);
+      } catch (error) {
+        console.error("Error fetching likes data:", error);
+      }
+    };
     fetchLikes();
+    fetchAnswer();
   }, []);
   useEffect(() => {
     if (questions.length > 0) {
@@ -102,14 +111,21 @@ const QuestionsTabAd = () => {
       <Box sx={{ padding: "20px", paddingTop: "40px" }}>
         {value === 0 && (
           <Grid container spacing={3}>
-            {answeredQuestions.map(
-              (question) =>
-                !question.isDeleted && (
-                  <Grid item xs={12} sm={6} md={4} key={question.id}>
-                    <QuestionsCardAd question={question} likes={likes} />
-                  </Grid>
-                )
-            )}
+            {answeredQuestions
+              .slice()
+              .reverse()
+              .map(
+                (question) =>
+                  !question.isDeleted && (
+                    <Grid item xs={12} sm={6} md={4} key={question.id}>
+                      <QuestionsCardAd
+                        question={question}
+                        likes={likes}
+                        answers={answers}
+                      />
+                    </Grid>
+                  )
+              )}
           </Grid>
         )}
         {value === 1 && (

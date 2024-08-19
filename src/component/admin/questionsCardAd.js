@@ -14,18 +14,19 @@ import {
 import FavoriteIcon from "@mui/icons-material/FavoriteBorder";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
-const QuestionsCardAd = ({ question, likes }) => {
+const QuestionsCardAd = ({ question, likes, answers }) => {
   const [open, setOpen] = useState(false);
 
   if (!question) {
     return null;
   }
 
-  const { liked = false, text, answers = 0 } = question;
+  const { liked = false, text } = question;
 
   // Kiểm tra question.id và in ra likes để xác nhận dữ liệu
   console.log("Question ID:", question.id);
   console.log("Likes Data:", likes);
+  console.log("Answers Data:", answers);
 
   // Tìm số lượng likes cho câu hỏi hiện tại
   const questionLikes = likes.find(
@@ -34,6 +35,9 @@ const QuestionsCardAd = ({ question, likes }) => {
 
   // Lấy số lượng likes hoặc gán giá trị mặc định là 0
   const likesCount = questionLikes ? questionLikes.likedBy.length : 0;
+  const answer = answers.find(
+    (ans) => parseInt(ans.questionId) === parseInt(question.id)
+  );
   console.log("Question Likes:", questionLikes);
 
   const handleClickOpen = () => {
@@ -127,7 +131,7 @@ const QuestionsCardAd = ({ question, likes }) => {
       >
         <DialogContent>
           <DialogContentText sx={{ color: "#ffffff" }}>
-            {question.content}{" "}
+            {answer ? answer.content : "NO DATA"}
             {/* Use the question text or another piece of text */}
           </DialogContentText>
         </DialogContent>
