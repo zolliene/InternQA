@@ -1,0 +1,11 @@
+:root {
+  --tab-color: #7291e6;
+  --dark: #3d52a2;
+  --green: #8698c4;
+  --black: #000000;
+  --grey: #f3f3f3;
+  --blackV2: #292a32;
+}
+body {
+  font-family: "Space Grotesk", Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+}
