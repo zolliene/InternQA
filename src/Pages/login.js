@@ -23,15 +23,15 @@ const LoginPage = () => {
         backgroundImage: `url(${backgroundImage})`, 
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        paddingRight: '200px' 
+        paddingRight: '5%' 
       }}
     >
       <Paper
         elevation={3}
         sx={{
           display: 'flex',
-          width: '700px',
-          height: '800px',
+          width: '50%',
+          height: '500px',
           borderRadius: '10px',
           overflow: 'hidden',
         }}
@@ -47,7 +47,7 @@ const LoginPage = () => {
             padding: '2rem',
           }}
         >
-          <Typography variant="h2" sx={{ fontWeight: 'bold', mb: 4, textAlign: 'left' }}>
+          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 4, textAlign: 'left' }}>
             Welcome to <br/><span style={{ color: '#3f51b5' }}>Amazing Tech</span>
           </Typography>
           <TextField
