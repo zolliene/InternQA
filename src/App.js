@@ -1,12 +1,13 @@
-import './App.css';
-import HomePage from './Pages/homePage';
-import LoginPage from './Pages/login';
+import "./App.css";
+import AdminHomepage from "./Pages/admin/AdminHomepage.js";
+import HomePage from "./Pages/homePage";
+import LoginPage from "./Pages/login";
 
 function App() {
   return (
     <div className="App">
       {/* <LoginPage/> */}
-      <HomePage/>
+      <AdminHomepage />
     </div>
   );
 }
