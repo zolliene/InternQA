@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -25,6 +25,7 @@ import axios from "axios";
 import API_BASE_URL from "../../config";
 import { useDispatch } from "react-redux";
 import { addAnswer } from "../../features/answerslice";
+import { fetchQuestions } from "../../features/questionsSlice";
 
 const getStatusStyles = (status) => {
   switch (status) {
@@ -75,11 +76,39 @@ const QuestionsAccordion = ({
     console.log(`Edit question with id: ${id}`);
   };
 
-  const handleDelete = (id) => {
-    // Logic for deleting the question
-    console.log(`Delete question with id: ${id}`);
+  const handleDelete = async (id) => {
+    try {
+      console.log(`Attempting to delete question with ID: ${id}`);
+      const response = await axios.patch(`${API_BASE_URL}/questions/${id}`, {
+        isDeleted: true, // Đặt isDeleted thành true để đánh dấu là đã xóa
+      });
+      console.log("Delete response:", response.data);
+      dispatch(fetchQuestions());
+      // Cập nhật UI sau khi xóa
+      setAnsweredQuestions((prevAnswered) =>
+        prevAnswered.filter((q) => q.id !== id)
+      );
+
+      // Cập nhật danh sách câu hỏi chưa được trả lời, chỉ thêm nếu nó chưa tồn tại trong danh sách
+      setUnansweredQuestions((prevUnanswered) => {
+        const alreadyExists = prevUnanswered.some((q) => q.id === id);
+        if (!alreadyExists) {
+          return [
+            ...prevUnanswered,
+            { ...prevUnanswered.find((q) => q.id === id), isAnswered: false },
+          ];
+        }
+        return prevUnanswered;
+      });
+
+      console.log(`Question ID ${id} marked as unanswered.`);
+    } catch (error) {
+      console.error(`Error marking question ID ${id} as unanswered:`, error);
+    }
   };
+
   const handleAnswerSubmit = async (question) => {
+    console.log("Submitting answer for question:", question.id);
     if (!answerContent.trim()) {
       console.error("Answer content cannot be empty");
       return;
@@ -118,7 +147,7 @@ const QuestionsAccordion = ({
 
       // Xóa nội dung sau khi gửi
       setAnswerContent("");
-
+      dispatch(fetchQuestions());
       // Cập nhật lại danh sách câu hỏi trong UI nếu cần thiết
       setUnansweredQuestions((prevQuestions) =>
         prevQuestions.filter((q) => q.id !== question.id)

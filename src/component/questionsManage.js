@@ -21,6 +21,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
+import API_BASE_URL from "../config";
+import { useDispatch } from "react-redux";
+import { addQuestion } from "../features/questionsSlice";
 
 // const questions = [
 //     { id: 1, title: "Consultation", content: "During the initial consultation, we will discuss your business goals and objectives, target audience, and current marketing efforts. This will allow us to understand your needs and tailor our services to best fit your requirements.", status: "selected" },
@@ -51,14 +55,16 @@ const QuestionsAccordion = ({ questions, answers }) => {
   const [expanded, setExpanded] = useState(false);
   const [open, setOpen] = useState(false);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
+  console.log("Questions prop:", questions);
+
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
-
     if (user && user.id) {
       const userQuestions = questions.filter(
         (question) =>
           parseInt(question.userId) === parseInt(user.id) && !question.isDeleted
       );
+
       setFilteredQuestions(userQuestions);
     }
   }, [questions]);
@@ -74,20 +80,52 @@ const QuestionsAccordion = ({ questions, answers }) => {
     setOpen(false);
   };
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    console.log("New question submitted:", values.newQuestion);
-    setSubmitting(false);
-    handleClose();
-  };
-
   const handleEdit = (id) => {
     // Logic for editing the question
     console.log(`Edit question with id: ${id}`);
   };
 
-  const handleDelete = (id) => {
-    // Logic for deleting the question
-    console.log(`Delete question with id: ${id}`);
+  //   const handleDelete = (id) => {
+  //     // Logic for deleting the question
+  //     console.log(`Delete question with id: ${id}`);
+  //   };
+  const handleDelete = async (id) => {
+    try {
+      // Gửi yêu cầu cập nhật câu hỏi thành isDeleted: true
+      await axios.patch(`${API_BASE_URL}/questions/${id}`, {
+        isDeleted: true,
+      });
+
+      // Cập nhật danh sách câu hỏi đã lọc để loại bỏ câu hỏi vừa bị xóa
+      setFilteredQuestions((prevQuestions) =>
+        prevQuestions.filter((question) => question.id !== id)
+      );
+
+      console.log(`Question ID ${id} marked as deleted.`);
+    } catch (error) {
+      console.error(`Error deleting question ID ${id}:`, error);
+    }
+  };
+  const dispatch = useDispatch();
+
+  //   const handleSubmit = (values, { setSubmitting }) => {
+  //     dispatch(addQuestion(values.newQuestion));
+  //     setSubmitting(false);
+  //     handleClose();
+  //   };
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      // Gọi hàm addQuestion từ slice Redux và truyền dữ liệu cần thiết
+      await dispatch(
+        addQuestion({ content: values.newQuestion, userId: user.id })
+      );
+      setSubmitting(false);
+      handleClose();
+    } catch (error) {
+      console.error("Failed to add question:", error);
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -109,82 +147,11 @@ const QuestionsAccordion = ({ questions, answers }) => {
           Add new questions
         </Button>
       </Box>
-      {/* {filteredQuestions.map((question, index) => (
-        <Accordion
-          key={question.id}
-          expanded={expanded === `panel${question.id}`}
-          onChange={handleChange(`panel${question.id}`)}
-          sx={{
-            ...getStatusStyles(question.status),
-            borderRadius: "16px",
-            marginBottom: "10px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <AccordionSummary
-            expandIcon={
-              expanded === `panel${question.id}` ? (
-                <ExpandLessIcon
-                  sx={{
-                    color:
-                      question.status === "selected" ? "#ffffff" : "#2D3748",
-                  }}
-                />
-              ) : (
-                <ExpandMoreIcon
-                  sx={{
-                    color:
-                      question.status === "selected" ? "#ffffff" : "#2D3748",
-                  }}
-                />
-              )
-            }
-            aria-controls={`panel${question.id}-content`}
-            id={`panel${question.id}-header`}
-            sx={{ padding: "16px" }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              {index < 10 ? `0${index + 1}` : index + 1} {question.content}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ marginBottom: "8px", textAlign: "left" }}
-              >
-                {question.content || "No details available."}
-              </Typography>
-              <Box>
-                <IconButton
-                  onClick={() => handleEdit(question.id)}
-                  sx={{ color: "#2D3748" }}
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleDelete(question.id)}
-                  sx={{ color: "#2D3748" }}
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      ))} */}
       {filteredQuestions.map((question, index) => {
         // Tìm câu trả lời tương ứng với câu hỏi hiện tại
         const relatedAnswers = answers.filter(
           (answer) => parseInt(answer.questionId) === parseInt(question.id)
         );
-        console.log(relatedAnswers, "re");
         return (
           <Accordion
             key={question.id}

@@ -46,12 +46,14 @@ const QuestionsTabAd = () => {
   useEffect(() => {
     if (questions.length > 0) {
       const filteredQuestions = questions.filter(
-        (question) => question.isAnswered
+        (question) => question.isAnswered && !question.isDeleted
       );
 
       setAnsweredQuestions(filteredQuestions);
       setUnansweredQuestions(
-        questions.filter((question) => question.isAnswered === false)
+        questions.filter(
+          (question) => question.isAnswered === false && !question.isDeleted
+        )
       );
     }
   }, [questions]);

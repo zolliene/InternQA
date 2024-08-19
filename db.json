@@ -49,19 +49,26 @@
       "userId": 3,
       "content": "How do you handle form validation in React?",
       "isAnswered": false,
-      "isDeleted": false
+      "isDeleted": true
     },
     {
       "id": "5",
       "userId": 1,
       "content": "What is the context API in React?",
       "isAnswered": true,
-      "isDeleted": false
+      "isDeleted": true
     },
     {
       "id": "6",
       "userId": 3,
       "content": "How to manage side effects in React?",
+      "isAnswered": true,
+      "isDeleted": false
+    },
+    {
+      "id": "7",
+      "userId": "1",
+      "content": "What is your name",
       "isAnswered": true,
       "isDeleted": false
     }
@@ -99,37 +106,34 @@
     },
     {
       "id": "6",
-      "questionId": "6",
-      "userId": 3,
-      "content": "idk"
+      "questionId": "7",
+      "userId": "1",
+      "content": "hello"
+    },
+    {
+      "id": "7",
+      "questionId": "7",
+      "userId": "1",
+      "content": "hello"
     }
   ],
   "likes": [
     {
       "questionId": 1,
       "likesCount": 2,
-      "likedBy": [
-        1,
-        3
-      ],
+      "likedBy": [1, 3],
       "id": "12a0"
     },
     {
       "questionId": 2,
       "likesCount": 1,
-      "likedBy": [
-        2
-      ],
+      "likedBy": [2],
       "id": "dae8"
     },
     {
       "questionId": 3,
       "likesCount": 3,
-      "likedBy": [
-        1,
-        2,
-        3
-      ],
+      "likedBy": [1, 2, 3],
       "id": "ddf5"
     },
     {
@@ -141,17 +145,13 @@
     {
       "questionId": 5,
       "likesCount": 1,
-      "likedBy": [
-        2
-      ],
+      "likedBy": [2],
       "id": "3a06"
     },
     {
       "questionId": 6,
       "likesCount": 1,
-      "likedBy": [
-        1
-      ],
+      "likedBy": [1],
       "id": "bdf1"
     }
   ]
