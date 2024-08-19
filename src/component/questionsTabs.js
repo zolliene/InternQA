@@ -46,17 +46,17 @@ const QuestionsTab = () => {
             },
           },
           '& .MuiTabs-flexContainer': {
-            justifyContent: 'center', // Center the tab labels
-            backgroundColor: '#7289da', // Background color behind the tabs
-            borderRadius: '8px', // Make the tab container rounded
-            padding: '5px', // Add some padding around the tabs
+            justifyContent: 'center', 
+            backgroundColor: '#7289da', 
+            borderRadius: '8px', 
+            padding: '5px',
           },
         }}
       >
         <Tab label="All Questions" />
         <Tab label="My Questions" />
       </Tabs>
-      <Box sx={{ padding: '20px', paddingTop: '40px' }}>
+      <Box sx={{ padding: '20px', paddingTop: '40px', paddingBottom:'100px' }}>
         {value === 0 && (
           <Grid container spacing={3}>
             {questions.map((question) => (
