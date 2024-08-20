@@ -2,9 +2,14 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, Box, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import logo from '../image/logo.png';
 import PersonIcon from '@mui/icons-material/Person';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import LogoutIcon from '@mui/icons-material/Logout';
+import HomeIcon from '@mui/icons-material/Home';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [favoriteColor, setFavoriteColor] = useState('black'); // State to manage FavoriteIcon color
   const isMobile = useMediaQuery('(max-width:600px)'); // Media query for mobile devices
 
   const handleMenuOpen = (event) => {
@@ -13,6 +18,11 @@ const Header = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleFavoriteClick = () => {
+    // Toggle between black and blue colors when the icon is clicked
+    setFavoriteColor((prevColor) => (prevColor === 'black' ? 'blue' : 'black'));
   };
 
   const handleLogout = () => {
@@ -75,7 +85,23 @@ const Header = () => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
           >
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <Link to="/home-page">
+              <MenuItem>
+                <HomeIcon 
+                sx={{ color: favoriteColor }}
+                onClick={handleFavoriteClick}
+                />
+              </MenuItem>
+            </Link>
+            <Link to="/your-fav">
+              <MenuItem>
+                <FavoriteIcon
+                  sx={{ color: favoriteColor }}
+                  onClick={handleFavoriteClick}
+                />
+              </MenuItem>
+            </Link>
+            <MenuItem onClick={handleLogout}><LogoutIcon /></MenuItem>
           </Menu>
         </Box>
       </Toolbar>

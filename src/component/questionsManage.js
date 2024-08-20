@@ -13,6 +13,8 @@ import {
   DialogTitle,
   TextField,
   IconButton,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -26,36 +28,21 @@ import API_BASE_URL from "../config";
 import { useDispatch } from "react-redux";
 import { addQuestion } from "../features/questionsSlice";
 
-// const questions = [
-//     { id: 1, title: "Consultation", content: "During the initial consultation, we will discuss your business goals and objectives, target audience, and current marketing efforts. This will allow us to understand your needs and tailor our services to best fit your requirements.", status: "selected" },
-//     { id: 2, title: "Research and Strategy Development", content: "", status: "unanswered" },
-//     { id: 3, title: "Implementation", content: "", status: "unanswered" },
-//     { id: 4, title: "Monitoring and Optimization", content: "", status: "unanswered" },
-//     { id: 5, title: "Reporting and Communication", content: "", status: "answered" },
-//     { id: 6, title: "Continual Improvement", content: "", status: "answered" },
-// ];
-
-const getStatusStyles = (status) => {
-  switch (status) {
-    case "selected":
-      return { backgroundColor: "#5A67D8", color: "#ffffff" };
-    case "answered":
-      return { backgroundColor: "#E2E8F0", color: "#2D3748" };
-    default:
-      return { backgroundColor: "#ffffff", color: "#2D3748" };
-  }
-};
-
-// Yup validation schema
+// Yup validation schema for editing
 const validationSchema = Yup.object().shape({
-  newQuestion: Yup.string().required("The question field cannot be empty"),
+  editQuestion: Yup.string().required("The question field cannot be empty"),
 });
 
 const QuestionsAccordion = ({ questions, answers }) => {
   const [expanded, setExpanded] = useState(false);
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
-  console.log("Questions prop:", questions);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
@@ -68,6 +55,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
       setFilteredQuestions(userQuestions);
     }
   }, [questions]);
+
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };
@@ -80,39 +68,74 @@ const QuestionsAccordion = ({ questions, answers }) => {
     setOpen(false);
   };
 
-  const handleEdit = (id) => {
-    // Logic for editing the question
-    console.log(`Edit question with id: ${id}`);
+  const handleEditOpen = (question) => {
+    setCurrentQuestion(question);
+    setEditOpen(true);
   };
 
-  //   const handleDelete = (id) => {
-  //     // Logic for deleting the question
-  //     console.log(`Delete question with id: ${id}`);
-  //   };
-  const handleDelete = async (id) => {
+  const handleEditClose = () => {
+    setEditOpen(false);
+  };
+
+  const handleDeleteOpen = (question) => {
+    setCurrentQuestion(question);
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleEditSubmit = async (values, { setSubmitting }) => {
+    try {
+      // Gửi yêu cầu cập nhật câu hỏi
+      await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
+        content: values.editQuestion,
+      });
+
+      // Cập nhật danh sách câu hỏi
+      setFilteredQuestions((prevQuestions) =>
+        prevQuestions.map((question) =>
+          question.id === currentQuestion.id
+            ? { ...question, content: values.editQuestion }
+            : question
+        )
+      );
+
+      setSubmitting(false);
+      handleEditClose();
+      setSnackbarMessage("Edit question successful");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Failed to update question:", error);
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
     try {
       // Gửi yêu cầu cập nhật câu hỏi thành isDeleted: true
-      await axios.patch(`${API_BASE_URL}/questions/${id}`, {
+      await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
         isDeleted: true,
       });
 
       // Cập nhật danh sách câu hỏi đã lọc để loại bỏ câu hỏi vừa bị xóa
       setFilteredQuestions((prevQuestions) =>
-        prevQuestions.filter((question) => question.id !== id)
+        prevQuestions.filter((question) => question.id !== currentQuestion.id)
       );
 
-      console.log(`Question ID ${id} marked as deleted.`);
+      setDeleteOpen(false);
+      setSnackbarMessage("Delete successful");
+      setSnackbarOpen(true);
     } catch (error) {
-      console.error(`Error deleting question ID ${id}:`, error);
+      console.error(`Error deleting question ID ${currentQuestion.id}:`, error);
     }
   };
-  const dispatch = useDispatch();
 
-  //   const handleSubmit = (values, { setSubmitting }) => {
-  //     dispatch(addQuestion(values.newQuestion));
-  //     setSubmitting(false);
-  //     handleClose();
-  //   };
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const user = JSON.parse(sessionStorage.getItem("user"));
@@ -122,9 +145,22 @@ const QuestionsAccordion = ({ questions, answers }) => {
       );
       setSubmitting(false);
       handleClose();
+      setSnackbarMessage("Add question successful");
+      setSnackbarOpen(true);
     } catch (error) {
       console.error("Failed to add question:", error);
       setSubmitting(false);
+    }
+  };
+
+  const getStatusStyles = (status) => {
+    switch (status) {
+      case "selected":
+        return { backgroundColor: "#5A67D8", color: "#ffffff" };
+      case "answered":
+        return { backgroundColor: "#E2E8F0", color: "#2D3748" };
+      default:
+        return { backgroundColor: "#ffffff", color: "#2D3748" };
     }
   };
 
@@ -218,13 +254,13 @@ const QuestionsAccordion = ({ questions, answers }) => {
 
                 <Box>
                   <IconButton
-                    onClick={() => handleEdit(question.id)}
+                    onClick={() => handleEditOpen(question)}
                     sx={{ color: "#2D3748" }}
                   >
                     <EditIcon />
                   </IconButton>
                   <IconButton
-                    onClick={() => handleDelete(question.id)}
+                    onClick={() => handleDeleteOpen(question)}
                     sx={{ color: "#2D3748" }}
                   >
                     <DeleteIcon />
@@ -236,6 +272,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
         );
       })}
 
+      {/* Add New Question */}
       <Dialog
         open={open}
         onClose={handleClose}
@@ -266,7 +303,11 @@ const QuestionsAccordion = ({ questions, answers }) => {
 
         <Formik
           initialValues={{ newQuestion: "" }}
-          validationSchema={validationSchema}
+          validationSchema={Yup.object().shape({
+            newQuestion: Yup.string().required(
+              "The question field cannot be empty"
+            ),
+          })}
           onSubmit={handleSubmit}
         >
           {({ errors, touched }) => (
@@ -327,6 +368,141 @@ const QuestionsAccordion = ({ questions, answers }) => {
           )}
         </Formik>
       </Dialog>
+
+      {/* Edit Question */}
+      {currentQuestion && (
+        <Dialog
+          open={editOpen}
+          onClose={handleEditClose}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx: {
+              width: "450px",
+              maxWidth: "none",
+            },
+          }}
+        >
+          <DialogTitle sx={{ m: 0, p: 2 }}>
+            Edit Question
+            <IconButton
+              aria-label="close"
+              onClick={handleEditClose}
+              sx={{
+                position: "absolute",
+                right: 8,
+                top: 8,
+                color: (theme) => theme.palette.grey[500],
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+
+          <Formik
+            initialValues={{ editQuestion: currentQuestion.content }}
+            validationSchema={validationSchema}
+            onSubmit={handleEditSubmit}
+          >
+            {({ errors, touched }) => (
+              <Form>
+                <DialogContent>
+                  <DialogContentText>
+                    Please edit your question below:
+                  </DialogContentText>
+                  <Field
+                    as={TextField}
+                    name="editQuestion"
+                    label="Edit Question"
+                    fullWidth
+                    variant="outlined"
+                    error={touched.editQuestion && !!errors.editQuestion}
+                    helperText={touched.editQuestion && errors.editQuestion}
+                    sx={{
+                      marginTop: "16px",
+                      "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                          borderColor: "#ccc",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#5A67D8",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#5A67D8",
+                        },
+                      },
+                      "& .MuiInputLabel-root.Mui-focused": {
+                        color: "#5A67D8",
+                      },
+                    }}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    type="submit"
+                    color="primary"
+                    sx={{
+                      color: "#5A67D8",
+                      "&:hover": {
+                        backgroundColor: "#5A67D8",
+                        color: "white",
+                      },
+                      "&:focus": {
+                        backgroundColor: "#5A67D8",
+                      },
+                      "&:active": {
+                        backgroundColor: "#5A67D8",
+                      },
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </DialogActions>
+              </Form>
+            )}
+          </Formik>
+        </Dialog>
+      )}
+
+      {/* Delete Confirmation */}
+      {currentQuestion && (
+        <Dialog
+          open={deleteOpen}
+          onClose={handleDeleteClose}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Confirm Deletion</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this question?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteClose} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+
+      {/* Snackbar for success messages */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       <Box sx={{ marginTop: "20px", textAlign: "left" }}>
         <Box
