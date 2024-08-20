@@ -26,7 +26,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import API_BASE_URL from "../config";
 import { useDispatch } from "react-redux";
-import { addQuestion } from "../features/questionsSlice";
+import { addQuestion, deleteQuestion } from "../features/questionsSlice";
 
 // Yup validation schema for editing
 const validationSchema = Yup.object().shape({
@@ -122,7 +122,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
       await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
         isDeleted: true,
       });
-
+      dispatch(deleteQuestion(currentQuestion.id));
       // Cập nhật danh sách câu hỏi đã lọc để loại bỏ câu hỏi vừa bị xóa
       setFilteredQuestions((prevQuestions) =>
         prevQuestions.filter((question) => question.id !== currentQuestion.id)
@@ -482,11 +482,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
             <Button onClick={handleDeleteClose} color="primary">
               Cancel
             </Button>
-            <Button
-              onClick={handleDelete}
-              color="error"
-              variant="contained"
-            >
+            <Button onClick={handleDelete} color="error" variant="contained">
               Delete
             </Button>
           </DialogActions>

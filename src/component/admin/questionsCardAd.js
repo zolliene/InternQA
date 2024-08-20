@@ -10,52 +10,33 @@
 //   DialogActions,
 //   DialogContent,
 //   DialogContentText,
+//   TextField,
 // } from "@mui/material";
 // import FavoriteIcon from "@mui/icons-material/FavoriteBorder";
 // import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-// import { useSelector } from "react-redux";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchAnswers, updateAnswer } from "../../features/answerslice"; // Assume you have an updateAnswer action
 
 // const QuestionsCardAd = ({ question, likes }) => {
 //   const [open, setOpen] = useState(false);
-//   // const [currentAnswer, setCurrentAnswer] = useState(null);
-
-//   // useEffect(() => {
-//   //   const answer = answers.find(
-//   //     (ans) => parseInt(ans.questionId) === parseInt(question.id)
-//   //   );
-//   //   setCurrentAnswer(answer);
-//   //   console.log("a", answer);
-//   // }, [answers, question, open]);
-//   const answers = useSelector((state) => state.answers.items); // Lấy danh sách câu trả lời từ Redux Store
+//   const answers = useSelector((state) => state.answers.items || []);
 //   const [currentAnswer, setCurrentAnswer] = useState(null);
+//   const [editedAnswer, setEditedAnswer] = useState(""); // For storing edited answer
+//   const dispatch = useDispatch();
 
 //   useEffect(() => {
-//     const answer = answers.find(
-//       (ans) => parseInt(ans.questionId) === parseInt(question.id)
-//     );
-//     setCurrentAnswer(answer);
+//     if (answers && question) {
+//       const answer = answers.find(
+//         (ans) => parseInt(ans.questionId) === parseInt(question.id)
+//       );
+//       setCurrentAnswer(answer);
+//       setEditedAnswer(answer ? answer.content : ""); // Set initial edited content
+//     }
 //   }, [answers, question]);
-//   if (!question) {
-//     return null;
-//   }
-//   const { liked = false, text } = question;
 
-//   // Kiểm tra question.id và in ra likes để xác nhận dữ liệu
-//   console.log("Question ID:", question.id);
-//   console.log("Likes Data:", likes);
-//   console.log("Answers Data:", answers);
-
-//   // Tìm số lượng likes cho câu hỏi hiện tại
-//   const questionLikes = likes.find(
-//     (like) => parseInt(like.questionId) === parseInt(question.id)
-//   );
-
-//   // Lấy số lượng likes hoặc gán giá trị mặc định là 0
-//   const likesCount = questionLikes ? questionLikes.likedBy.length : 0;
-//   // const answer = answers.find(
-//   //   (ans) => parseInt(ans.questionId) === parseInt(question.id)
-//   // );
-//   console.log("Question Likes:", questionLikes);
+//   useEffect(() => {
+//     dispatch(fetchAnswers());
+//   }, [dispatch]);
 
 //   const handleClickOpen = () => {
 //     setOpen(true);
@@ -65,6 +46,16 @@
 //     setOpen(false);
 //   };
 
+//   const handleSave = () => {
+//     if (currentAnswer) {
+//       dispatch(updateAnswer({ ...currentAnswer, content: editedAnswer }));
+//     }
+//     setOpen(false);
+//   };
+
+//   // Simulate checking if the user is admin
+//   const isAdmin = true; // Replace with actual admin check logic
+
 //   return (
 //     <>
 //       <Box
@@ -72,8 +63,8 @@
 //       >
 //         <Card
 //           sx={{
-//             backgroundColor: liked ? "#5A67D8" : "#E2E8F0",
-//             color: liked ? "#ffffff" : "#2D3748",
+//             backgroundColor: question.liked ? "#5A67D8" : "#E2E8F0",
+//             color: question.liked ? "#ffffff" : "#2D3748",
 //             borderRadius: "16px",
 //             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
 //             height: "fit-content",
@@ -106,7 +97,7 @@
 //                   textTransform: "none",
 //                   padding: 0,
 //                   minWidth: "auto",
-//                   color: liked ? "#ffffff" : "#2D3748",
+//                   color: question.liked ? "#ffffff" : "#2D3748",
 //                   display: "flex",
 //                   alignItems: "center",
 //                   "&:hover": {
@@ -116,9 +107,9 @@
 //               >
 //                 <ArrowForwardIcon
 //                   sx={{
-//                     fontSize: "20px", // Adjust the size of the arrow if needed
-//                     marginLeft: "4px", // Space between the text and the icon
-//                     color: liked ? "#ffffff" : "#2D3748",
+//                     fontSize: "20px",
+//                     marginLeft: "4px",
+//                     color: question.liked ? "#ffffff" : "#2D3748",
 //                   }}
 //                 />
 //                 View Answer
@@ -126,9 +117,11 @@
 //             </Box>
 //             <Box sx={{ display: "flex", alignItems: "center" }}>
 //               <IconButton size="small">
-//                 <FavoriteIcon sx={{ color: liked ? "#ffffff" : "#2D3748" }} />
+//                 <FavoriteIcon
+//                   sx={{ color: question.liked ? "#ffffff" : "#2D3748" }}
+//                 />
 //               </IconButton>
-//               <Typography variant="body2">{likesCount}</Typography>
+//               <Typography variant="body2">{likes?.length || 0}</Typography>
 //             </Box>
 //           </Box>
 //         </Card>
@@ -139,29 +132,49 @@
 //         onClose={handleClose}
 //         PaperProps={{
 //           sx: {
-//             backgroundColor: "#5A67D8", // Matches the card background color
-//             color: "#ffffff", // Text color
+//             backgroundColor: "#5A67D8",
+//             color: "#ffffff",
 //             padding: "16px",
-//             borderRadius: "16px", // Rounded corners
+//             borderRadius: "16px",
 //           },
 //         }}
 //       >
 //         <DialogContent>
-//           <DialogContentText sx={{ color: "#ffffff" }}>
-//             {currentAnswer ? currentAnswer.content : "NO DATA"}
-//             {/* {answer ? answer.content : "NO DATA"} */}
-//             {/* Use the question text or another piece of text */}
-//           </DialogContentText>
+//           {isAdmin ? (
+//             <TextField
+//               fullWidth
+//               multiline
+//               rows={4}
+//               value={editedAnswer}
+//               onChange={(e) => setEditedAnswer(e.target.value)}
+//               variant="outlined"
+//               sx={{
+//                 backgroundColor: "#ffffff",
+//                 borderRadius: "8px",
+//                 color: "#000000",
+//               }}
+//             />
+//           ) : (
+//             <DialogContentText sx={{ color: "#ffffff" }}>
+//               {currentAnswer ? currentAnswer.content : "NO DATA"}
+//             </DialogContentText>
+//           )}
 //         </DialogContent>
 //         <DialogActions sx={{ justifyContent: "flex-start" }}>
-//           {" "}
-//           {/* Align to the left */}
 //           <Button
 //             onClick={handleClose}
 //             sx={{ color: "#ffffff", fontSize: "10px" }}
 //           >
 //             Close ×
 //           </Button>
+//           {isAdmin && (
+//             <Button
+//               onClick={handleSave}
+//               sx={{ color: "#ffffff", fontSize: "10px" }}
+//             >
+//               Save
+//             </Button>
+//           )}
 //         </DialogActions>
 //       </Dialog>
 //     </>
@@ -180,17 +193,20 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  TextField,
   DialogContentText,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/FavoriteBorder";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAnswers } from "../../features/answerslice";
+import { fetchAnswers, updateAnswer } from "../../features/answerslice"; // Assume you have an updateAnswer action
 
 const QuestionsCardAd = ({ question, likes }) => {
   const [open, setOpen] = useState(false);
-  const answers = useSelector((state) => state.answers.items || []); // Lấy danh sách câu trả lời từ Redux Store
+  const answers = useSelector((state) => state.answers.items || []);
   const [currentAnswer, setCurrentAnswer] = useState(null);
+  const [editedAnswer, setEditedAnswer] = useState(""); // For storing edited answer
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (answers && question) {
@@ -198,21 +214,13 @@ const QuestionsCardAd = ({ question, likes }) => {
         (ans) => parseInt(ans.questionId) === parseInt(question.id)
       );
       setCurrentAnswer(answer);
+      setEditedAnswer(answer ? answer.content : ""); // Set initial edited content
     }
   }, [answers, question]);
-  const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(fetchAnswers());
   }, [dispatch]);
-  if (!question) {
-    return null;
-  }
-
-  const questionLikes = likes?.find(
-    (like) => parseInt(like.questionId) === parseInt(question.id)
-  );
-
-  const likesCount = questionLikes ? questionLikes.likedBy.length : 0;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -221,6 +229,16 @@ const QuestionsCardAd = ({ question, likes }) => {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const handleSave = () => {
+    if (currentAnswer) {
+      dispatch(updateAnswer({ ...currentAnswer, content: editedAnswer }));
+    }
+    setOpen(false);
+  };
+
+  // Simulate checking if the user is admin
+  const isAdmin = true; // Replace with actual admin check logic
 
   return (
     <>
@@ -287,7 +305,7 @@ const QuestionsCardAd = ({ question, likes }) => {
                   sx={{ color: question.liked ? "#ffffff" : "#2D3748" }}
                 />
               </IconButton>
-              <Typography variant="body2">{likesCount}</Typography>
+              <Typography variant="body2">{likes?.length || 0}</Typography>
             </Box>
           </Box>
         </Card>
@@ -296,27 +314,74 @@ const QuestionsCardAd = ({ question, likes }) => {
       <Dialog
         open={open}
         onClose={handleClose}
+        maxWidth="sm"
+        fullWidth
         PaperProps={{
           sx: {
             backgroundColor: "#5A67D8",
             color: "#ffffff",
-            padding: "16px",
+            padding: "20px",
             borderRadius: "16px",
+            width: "100%",
+            maxWidth: "600px",
           },
         }}
       >
-        <DialogContent>
-          <DialogContentText sx={{ color: "#ffffff" }}>
-            {currentAnswer ? currentAnswer.content : "NO DATA"}
-          </DialogContentText>
+        <DialogContent sx={{ paddingBottom: "0", overflow: "hidden" }}>
+          {isAdmin ? (
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              value={editedAnswer}
+              onChange={(e) => setEditedAnswer(e.target.value)}
+              variant="outlined"
+              sx={{
+                backgroundColor: "#ffffff",
+                borderRadius: "8px",
+                color: "#000000",
+                fontSize: "16px",
+                padding: "10px",
+                marginBottom: "10px", // Add margin to prevent overflow
+                border: "none",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  border: "none",
+                },
+              }}
+            />
+          ) : (
+            <DialogContentText sx={{ color: "#ffffff", fontSize: "16px" }}>
+              {currentAnswer ? currentAnswer.content : "NO DATA"}
+            </DialogContentText>
+          )}
         </DialogContent>
-        <DialogActions sx={{ justifyContent: "flex-start" }}>
+        <DialogActions
+          sx={{ justifyContent: "space-between", padding: "0 16px 8px" }}
+        >
           <Button
             onClick={handleClose}
-            sx={{ color: "#ffffff", fontSize: "10px" }}
+            sx={{ color: "#ffffff", fontSize: "14px" }}
           >
             Close ×
           </Button>
+          {isAdmin && (
+            <Button
+              onClick={handleSave}
+              sx={{
+                backgroundColor: "#ffffff",
+                color: "#5A67D8",
+                padding: "8px 16px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                textTransform: "none",
+                "&:hover": {
+                  backgroundColor: "#f0f0f0",
+                },
+              }}
+            >
+              Save
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>

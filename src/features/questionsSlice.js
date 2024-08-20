@@ -122,15 +122,13 @@ export const updateQuestion = createAsyncThunk(
 );
 
 // Thunk để xóa câu hỏi
-export const removeQuestion = createAsyncThunk(
-  "questions/removeQuestion",
-  async (id, { rejectWithValue }) => {
-    try {
-      await axios.delete(`${API_BASE_URL}/questions/${id}`);
-      return id;
-    } catch (error) {
-      return rejectWithValue(error.response.data);
-    }
+export const deleteQuestion = createAsyncThunk(
+  "questions/deleteQuestion",
+  async (questionId) => {
+    await axios.patch(`${API_BASE_URL}/questions/${questionId}`, {
+      isDeleted: true,
+    });
+    return questionId;
   }
 );
 
@@ -158,6 +156,11 @@ const questionsSlice = createSlice({
       })
       .addCase(addQuestion.fulfilled, (state, action) => {
         state.items.push(action.payload); // Thêm câu hỏi mới vào danh sách
+      })
+      .addCase(deleteQuestion.fulfilled, (state, action) => {
+        state.items = state.items.filter(
+          (question) => question.id !== action.payload
+        );
       });
   },
 });

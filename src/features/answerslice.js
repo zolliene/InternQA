@@ -81,7 +81,15 @@ export const addAnswer = createAsyncThunk(
     return postResponse.data;
   }
 );
-
+export const updateAnswer = createAsyncThunk(
+  "answers/updateAnswer",
+  async ({ id, content }) => {
+    const response = await axios.patch(`${API_BASE_URL}/answers/${id}`, {
+      content,
+    });
+    return response.data;
+  }
+);
 const answersSlice = createSlice({
   name: "answers",
   initialState: {
