@@ -38,7 +38,7 @@ const QuestionsTab = () => {
             backgroundColor: 'transparent', // Remove background color
             borderRadius: '8px', // Make the tabs rounded
             '&.Mui-selected': {
-              backgroundColor: '#9aa0e1', // Light blue background for the selected tab
+              backgroundColor: '#5A67D8', // Light blue background for the selected tab
               color: '#ffffff', // White text color when selected
             },
             '&:hover': {

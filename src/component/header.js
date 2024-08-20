@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { AppBar, Toolbar, Box, IconButton, Menu, MenuItem } from '@mui/material';
+import { AppBar, Toolbar, Box, IconButton, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import logo from '../image/logo.png';
 import PersonIcon from '@mui/icons-material/Person';
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const isMobile = useMediaQuery('(max-width:600px)'); // Media query for mobile devices
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -15,16 +16,30 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    // Logic for logging out the user
     console.log("User logged out");
     handleMenuClose();
   };
 
   return (
-    <AppBar position="static" color="transparent" elevation={0} sx={{ borderBottom: '1px solid #ddd' }}>
+    <AppBar
+      position="static"
+      color="transparent"
+      elevation={0}
+      sx={{
+        borderBottom: '1px solid #ddd',
+        padding: isMobile ? '0 10px' : '0 20px', // Adjust padding for mobile
+      }}
+    >
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <img src={logo} alt="Amazing Tech Logo" style={{ height: '40px', marginRight: '10px' }} />
+          <img
+            src={logo}
+            alt="Amazing Tech Logo"
+            style={{
+              height: isMobile ? '30px' : '40px', // Adjust logo size for mobile
+              marginRight: '10px',
+            }}
+          />
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -32,7 +47,7 @@ const Header = () => {
             onClick={handleMenuOpen}
             sx={{ color: 'inherit' }}
           >
-            <PersonIcon sx={{ fontSize: 30 }} /> {/* Adjust the size as needed */}
+            <PersonIcon sx={{ fontSize: isMobile ? 25 : 30 }} /> {/* Adjust icon size */}
           </IconButton>
           <Menu
             anchorEl={anchorEl}

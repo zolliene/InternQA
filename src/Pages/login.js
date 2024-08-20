@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Box, Paper, IconButton } from '@mui/material';
+import { TextField, Button, Typography, Box, Paper, IconButton, useMediaQuery } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import backgroundImage from '../image/loginBackground.png'; 
+import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const isMobile = useMediaQuery('(max-width:600px)');
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -18,21 +20,22 @@ const LoginPage = () => {
       sx={{
         display: 'flex',
         height: '100vh',
-        justifyContent: 'flex-end', 
+        justifyContent: isMobile ? 'center' : 'flex-end', 
         alignItems: 'center',
         backgroundImage: `url(${backgroundImage})`, 
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        paddingRight: '5%' 
+        paddingRight: isMobile ? '0.5rem' : '5%',
+        paddingLeft: isMobile ? '0.5rem' : '0', 
       }}
     >
       <Paper
         elevation={3}
         sx={{
           display: 'flex',
-          width: '50%',
-          height: '500px',
-          borderRadius: '10px',
+          width: isMobile ? '100%' : '40%',
+          height: isMobile ? 'auto' : '80%',
+          borderRadius: isMobile ? '0' : '10px',
           overflow: 'hidden',
         }}
       >
@@ -43,11 +46,12 @@ const LoginPage = () => {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-            alignItems: 'flex-start', 
-            padding: '2rem',
+            alignItems: isMobile ? 'center' : 'flex-start',
+            padding: isMobile ? '1rem' : '2rem',
+            textAlign: isMobile ? 'center' : 'left',
           }}
         >
-          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 4, textAlign: 'left' }}>
+          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 4 }}>
             Welcome to <br/><span style={{ color: '#3f51b5' }}>Amazing Tech</span>
           </Typography>
           <TextField
@@ -88,11 +92,9 @@ const LoginPage = () => {
           >
             Login
           </Button>
-          <Typography variant="body2" sx={{ mt: 2, textAlign: 'center', width: '100%' }}>
+          <Typography variant="body2" sx={{ mt: 2 }}>
             Don’t have an account? &nbsp;
-            <a href="/signup" style={{ color: '#3f51b5', textDecoration: 'none' }}>
-              Sign up
-            </a>
+            <Link to="sign-up" style={{ color: '#3f51b5' }}>Sign up</Link>
           </Typography>
         </Box>
       </Paper>
