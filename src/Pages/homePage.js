@@ -7,10 +7,10 @@ import Footer from '../component/footer'
 export default function HomePage() {
   return (
     <div>
-        <Header/>
-        <QuestionsTab/>
-        <QuestionsCard/>
-        <Footer/>
+      <Header />
+      <QuestionsTab />
+      <QuestionsCard />
+      <Footer />
     </div>
-  )
+  );
 }

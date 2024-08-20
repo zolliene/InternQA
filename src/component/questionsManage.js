@@ -1,249 +1,399 @@
-import React, { useState } from 'react';
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, IconButton } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+  IconButton,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
+import axios from "axios";
+import API_BASE_URL from "../config";
+import { useDispatch } from "react-redux";
+import { addQuestion } from "../features/questionsSlice";
 
-const questions = [
-    { id: 1, title: "Consultation", content: "During the initial consultation, we will discuss your business goals and objectives, target audience, and current marketing efforts. This will allow us to understand your needs and tailor our services to best fit your requirements.", status: "selected" },
-    { id: 2, title: "Research and Strategy Development", content: "", status: "unanswered" },
-    { id: 3, title: "Implementation", content: "", status: "unanswered" },
-    { id: 4, title: "Monitoring and Optimization", content: "", status: "unanswered" },
-    { id: 5, title: "Reporting and Communication", content: "", status: "answered" },
-    { id: 6, title: "Continual Improvement", content: "", status: "answered" },
-];
+// const questions = [
+//     { id: 1, title: "Consultation", content: "During the initial consultation, we will discuss your business goals and objectives, target audience, and current marketing efforts. This will allow us to understand your needs and tailor our services to best fit your requirements.", status: "selected" },
+//     { id: 2, title: "Research and Strategy Development", content: "", status: "unanswered" },
+//     { id: 3, title: "Implementation", content: "", status: "unanswered" },
+//     { id: 4, title: "Monitoring and Optimization", content: "", status: "unanswered" },
+//     { id: 5, title: "Reporting and Communication", content: "", status: "answered" },
+//     { id: 6, title: "Continual Improvement", content: "", status: "answered" },
+// ];
 
 const getStatusStyles = (status) => {
-    switch (status) {
-        case "selected":
-            return { backgroundColor: '#5A67D8', color: '#ffffff' };
-        case "answered":
-            return { backgroundColor: '#E2E8F0', color: '#2D3748' };
-        default:
-            return { backgroundColor: '#ffffff', color: '#2D3748' };
-    }
+  switch (status) {
+    case "selected":
+      return { backgroundColor: "#5A67D8", color: "#ffffff" };
+    case "answered":
+      return { backgroundColor: "#E2E8F0", color: "#2D3748" };
+    default:
+      return { backgroundColor: "#ffffff", color: "#2D3748" };
+  }
 };
 
 // Yup validation schema
 const validationSchema = Yup.object().shape({
-    newQuestion: Yup.string().required('The question field cannot be empty'),
+  newQuestion: Yup.string().required("The question field cannot be empty"),
 });
 
-const QuestionsAccordion = () => {
-    const [expanded, setExpanded] = useState(false);
-    const [open, setOpen] = useState(false);
+const QuestionsAccordion = ({ questions, answers }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  console.log("Questions prop:", questions);
 
-    const handleChange = (panel) => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
-    };
+  useEffect(() => {
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    if (user && user.id) {
+      const userQuestions = questions.filter(
+        (question) =>
+          parseInt(question.userId) === parseInt(user.id) && !question.isDeleted
+      );
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+      setFilteredQuestions(userQuestions);
+    }
+  }, [questions]);
+  const handleChange = (panel) => (event, isExpanded) => {
+    setExpanded(isExpanded ? panel : false);
+  };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
 
-    const handleSubmit = (values, { setSubmitting }) => {
-        console.log("New question submitted:", values.newQuestion);
-        setSubmitting(false);
-        handleClose();
-    };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-    const handleEdit = (id) => {
-        // Logic for editing the question
-        console.log(`Edit question with id: ${id}`);
-    };
+  const handleEdit = (id) => {
+    // Logic for editing the question
+    console.log(`Edit question with id: ${id}`);
+  };
 
-    const handleDelete = (id) => {
-        // Logic for deleting the question
-        console.log(`Delete question with id: ${id}`);
-    };
+  //   const handleDelete = (id) => {
+  //     // Logic for deleting the question
+  //     console.log(`Delete question with id: ${id}`);
+  //   };
+  const handleDelete = async (id) => {
+    try {
+      // Gửi yêu cầu cập nhật câu hỏi thành isDeleted: true
+      await axios.patch(`${API_BASE_URL}/questions/${id}`, {
+        isDeleted: true,
+      });
 
-    return (
-        <Box sx={{ width: '60%', margin: 'auto', paddingTop: '20px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
-                <Button
-                    variant="contained"
+      // Cập nhật danh sách câu hỏi đã lọc để loại bỏ câu hỏi vừa bị xóa
+      setFilteredQuestions((prevQuestions) =>
+        prevQuestions.filter((question) => question.id !== id)
+      );
+
+      console.log(`Question ID ${id} marked as deleted.`);
+    } catch (error) {
+      console.error(`Error deleting question ID ${id}:`, error);
+    }
+  };
+  const dispatch = useDispatch();
+
+  //   const handleSubmit = (values, { setSubmitting }) => {
+  //     dispatch(addQuestion(values.newQuestion));
+  //     setSubmitting(false);
+  //     handleClose();
+  //   };
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      // Gọi hàm addQuestion từ slice Redux và truyền dữ liệu cần thiết
+      await dispatch(
+        addQuestion({ content: values.newQuestion, userId: user.id })
+      );
+      setSubmitting(false);
+      handleClose();
+    } catch (error) {
+      console.error("Failed to add question:", error);
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Box sx={{ width: "60%", margin: "auto", paddingTop: "20px" }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#5A67D8",
+            color: "#ffffff",
+            marginBottom: "20px",
+            borderRadius: "8px",
+            "&:hover": {
+              backgroundColor: "#b3b8e6",
+            },
+          }}
+          onClick={handleClickOpen}
+        >
+          Add new questions
+        </Button>
+      </Box>
+      {filteredQuestions.map((question, index) => {
+        // Tìm câu trả lời tương ứng với câu hỏi hiện tại
+        const relatedAnswers = answers.filter(
+          (answer) => parseInt(answer.questionId) === parseInt(question.id)
+        );
+        return (
+          <Accordion
+            key={question.id}
+            expanded={expanded === `panel${question.id}`}
+            onChange={handleChange(`panel${question.id}`)}
+            sx={{
+              ...getStatusStyles(question.status),
+              borderRadius: "16px",
+              marginBottom: "10px",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <AccordionSummary
+              expandIcon={
+                expanded === `panel${question.id}` ? (
+                  <ExpandLessIcon
                     sx={{
-                        backgroundColor: '#5A67D8',
-                        color: '#ffffff',
-                        marginBottom: '20px',
-                        borderRadius: '8px',
-                        '&:hover': {
-                            backgroundColor: '#b3b8e6',
-                        },
+                      color:
+                        question.status === "selected" ? "#ffffff" : "#2D3748",
                     }}
-                    onClick={handleClickOpen}
-                >
-                    Add new questions
-                </Button>
-            </Box>
-            {questions.map((question) => (
-                <Accordion
-                    key={question.id}
-                    expanded={expanded === `panel${question.id}`}
-                    onChange={handleChange(`panel${question.id}`)}
+                  />
+                ) : (
+                  <ExpandMoreIcon
                     sx={{
-                        ...getStatusStyles(question.status),
-                        borderRadius: '16px',
-                        marginBottom: '10px',
-                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                      color:
+                        question.status === "selected" ? "#ffffff" : "#2D3748",
                     }}
-                >
-                    <AccordionSummary
-                        expandIcon={
-                            expanded === `panel${question.id}` ? (
-                                <ExpandLessIcon sx={{ color: question.status === 'selected' ? '#ffffff' : '#2D3748' }} />
-                            ) : (
-                                <ExpandMoreIcon sx={{ color: question.status === 'selected' ? '#ffffff' : '#2D3748' }} />
-                            )
-                        }
-                        aria-controls={`panel${question.id}-content`}
-                        id={`panel${question.id}-header`}
-                        sx={{ padding: '16px' }}
-                    >
-                        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                            0{question.id} {question.title}
-                        </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                            <Typography variant="body2" sx={{ marginBottom: '8px', textAlign:'left' }}>
-                                {question.content || "No details available."}
-                            </Typography>
-                            <Box>
-                                <IconButton onClick={() => handleEdit(question.id)} sx={{ color: '#2D3748' }}>
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton onClick={() => handleDelete(question.id)} sx={{ color: '#2D3748' }}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </Box>
-                        </Box>
-                    </AccordionDetails>
-                </Accordion>
-            ))}
-
-            <Dialog
-                open={open}
-                onClose={handleClose}
-                maxWidth="md"
-                fullWidth
-                PaperProps={{
-                    sx: {
-                        width: '450px',
-                        maxWidth: 'none'
-                    },
-                }}
+                  />
+                )
+              }
+              aria-controls={`panel${question.id}-content`}
+              id={`panel${question.id}-header`}
+              sx={{ padding: "16px" }}
             >
-                <DialogTitle sx={{ m: 0, p: 2 }}>
-                    Add a New Question
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleClose}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: (theme) => theme.palette.grey[500],
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                
-                <Formik
-                    initialValues={{ newQuestion: '' }}
-                    validationSchema={validationSchema}
-                    onSubmit={handleSubmit}
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                {index < 10 ? `0${index + 1}` : index + 1} {question.content}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{ marginBottom: "8px", textAlign: "left" }}
                 >
-                    {({ errors, touched }) => (
-                        <Form>
-                            <DialogContent>
-                                <DialogContentText>
-                                    Please enter your question below:
-                                </DialogContentText>
-                                <Field
-                                    as={TextField}
-                                    name="newQuestion"
-                                    label="New Question"
-                                    fullWidth
-                                    variant="outlined"
-                                    error={touched.newQuestion && !!errors.newQuestion}
-                                    helperText={touched.newQuestion && errors.newQuestion}
-                                    sx={{
-                                        marginTop: '16px',
-                                        '& .MuiOutlinedInput-root': {
-                                            '& fieldset': {
-                                                borderColor: '#ccc',
-                                            },
-                                            '&:hover fieldset': {
-                                                borderColor: '#5A67D8',
-                                            },
-                                            '&.Mui-focused fieldset': {
-                                                borderColor: '#5A67D8',
-                                            },
-                                        },
-                                        '& .MuiInputLabel-root.Mui-focused': {
-                                            color: '#5A67D8',
-                                        },
-                                    }}
-                                />
-                            </DialogContent>
-                            <DialogActions>
-                                <Button
-                                    type="submit"
-                                    color="primary"
-                                    sx={{
-                                        color:'#5A67D8',
-                                        '&:hover': {
-                                            backgroundColor: '#5A67D8',
-                                            color:'white'
-                                        },
-                                        '&:focus': {
-                                            backgroundColor: '#5A67D8', 
-                                        },
-                                        '&:active': {
-                                            backgroundColor: '#5A67D8',
-                                        },
-                                    }}
-                                >
-                                    Submit
-                                </Button>
-                            </DialogActions>
-                        </Form>
-                    )}
-                </Formik>
-            </Dialog>
+                  {relatedAnswers.length === 0 ? "No details available." : ""}
+                </Typography>
 
-            <Box sx={{ marginTop: '20px', textAlign: 'left' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <Box component="span" sx={{ backgroundColor: '#5A67D8', borderRadius: '50%', display: 'inline-block', width: '15px', height: '15px', marginRight: '8px' }} />
-                    <Typography variant="body2" sx={{ color: '#212121', fontWeight: 'bold' }}>
-                        : selected question
-                    </Typography>
+                {/* Hiển thị tất cả các câu trả lời liên quan */}
+                {relatedAnswers.map((answer) => (
+                  <Typography
+                    key={answer.id}
+                    variant="body2"
+                    sx={{ marginTop: "16px", color: "#4A5568" }}
+                  >
+                    <strong>Answer:</strong> {answer.content}
+                  </Typography>
+                ))}
+
+                <Box>
+                  <IconButton
+                    onClick={() => handleEdit(question.id)}
+                    sx={{ color: "#2D3748" }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(question.id)}
+                    sx={{ color: "#2D3748" }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                    <Box component="span" sx={{ backgroundColor: '#E2E8F0', borderRadius: '50%', display: 'inline-block', width: '15px', height: '15px', marginRight: '8px' }} />
-                    <Typography variant="body2" sx={{ color: '#212121', fontWeight: 'bold' }}>
-                        : answered question
-                    </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box component="span" sx={{ backgroundColor: '#ffffff', borderRadius: '50%', display: 'inline-block', width: '15px', height: '15px', marginRight: '8px', border: '1px solid #2D3748' }} />
-                    <Typography variant="body2" sx={{ color: '#212121', fontWeight: 'bold' }}>
-                        : unanswered question
-                    </Typography>
-                </Box>
-            </Box>
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            width: "450px",
+            maxWidth: "none",
+          },
+        }}
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }}>
+          Add a New Question
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <Formik
+          initialValues={{ newQuestion: "" }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ errors, touched }) => (
+            <Form>
+              <DialogContent>
+                <DialogContentText>
+                  Please enter your question below:
+                </DialogContentText>
+                <Field
+                  as={TextField}
+                  name="newQuestion"
+                  label="New Question"
+                  fullWidth
+                  variant="outlined"
+                  error={touched.newQuestion && !!errors.newQuestion}
+                  helperText={touched.newQuestion && errors.newQuestion}
+                  sx={{
+                    marginTop: "16px",
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": {
+                        borderColor: "#ccc",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#5A67D8",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#5A67D8",
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#5A67D8",
+                    },
+                  }}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button
+                  type="submit"
+                  color="primary"
+                  sx={{
+                    color: "#5A67D8",
+                    "&:hover": {
+                      backgroundColor: "#5A67D8",
+                      color: "white",
+                    },
+                    "&:focus": {
+                      backgroundColor: "#5A67D8",
+                    },
+                    "&:active": {
+                      backgroundColor: "#5A67D8",
+                    },
+                  }}
+                >
+                  Submit
+                </Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
+
+      <Box sx={{ marginTop: "20px", textAlign: "left" }}>
+        <Box
+          sx={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+        >
+          <Box
+            component="span"
+            sx={{
+              backgroundColor: "#5A67D8",
+              borderRadius: "50%",
+              display: "inline-block",
+              width: "15px",
+              height: "15px",
+              marginRight: "8px",
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{ color: "#212121", fontWeight: "bold" }}
+          >
+            : selected question
+          </Typography>
         </Box>
-    );
+        <Box
+          sx={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
+        >
+          <Box
+            component="span"
+            sx={{
+              backgroundColor: "#E2E8F0",
+              borderRadius: "50%",
+              display: "inline-block",
+              width: "15px",
+              height: "15px",
+              marginRight: "8px",
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{ color: "#212121", fontWeight: "bold" }}
+          >
+            : answered question
+          </Typography>
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box
+            component="span"
+            sx={{
+              backgroundColor: "#ffffff",
+              borderRadius: "50%",
+              display: "inline-block",
+              width: "15px",
+              height: "15px",
+              marginRight: "8px",
+              border: "1px solid #2D3748",
+            }}
+          />
+          <Typography
+            variant="body2"
+            sx={{ color: "#212121", fontWeight: "bold" }}
+          >
+            : unanswered question
+          </Typography>
+        </Box>
+      </Box>
+    </Box>
+  );
 };
 
 export default QuestionsAccordion;
