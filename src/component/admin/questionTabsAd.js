@@ -120,11 +120,7 @@ const QuestionsTabAd = () => {
                 (question) =>
                   !question.isDeleted && (
                     <Grid item xs={12} sm={6} md={4} key={question.id}>
-                      <QuestionsCardAd
-                        question={question}
-                        likes={likes}
-                        answers={answers}
-                      />
+                      <QuestionsCardAd question={question} likes={likes} />
                     </Grid>
                   )
               )}

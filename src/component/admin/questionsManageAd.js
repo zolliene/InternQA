@@ -163,7 +163,7 @@ const QuestionsAccordion = ({
 
   return (
     <Box sx={{ width: "60%", margin: "auto", paddingTop: "20px" }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+      {/* <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
         <Button
           variant="contained"
           sx={{
@@ -179,101 +179,105 @@ const QuestionsAccordion = ({
         >
           Add new questions
         </Button>
-      </Box>
-      {unansweredQuestions.map((question, index) => (
-        <Accordion
-          key={question.id}
-          expanded={expanded === `panel${question.id}`}
-          onChange={handleChange(`panel${question.id}`)}
-          sx={{
-            ...getStatusStyles(question.status),
-            borderRadius: "16px",
-            marginBottom: "10px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <AccordionSummary
-            expandIcon={
-              expanded === `panel${question.id}` ? (
-                <ExpandLessIcon
-                  sx={{
-                    color:
-                      question.status === "selected" ? "#ffffff" : "#2D3748",
-                  }}
-                />
-              ) : (
-                <ExpandMoreIcon
-                  sx={{
-                    color:
-                      question.status === "selected" ? "#ffffff" : "#2D3748",
-                  }}
-                />
-              )
-            }
-            aria-controls={`panel${question.id}-content`}
-            id={`panel${question.id}-header`}
-            sx={{ padding: "16px" }}
+      </Box> */}
+      {unansweredQuestions.length > 0 ? (
+        unansweredQuestions.map((question, index) => (
+          <Accordion
+            key={question.id}
+            expanded={expanded === `panel${question.id}`}
+            onChange={handleChange(`panel${question.id}`)}
+            sx={{
+              ...getStatusStyles(question.status),
+              borderRadius: "16px",
+              marginBottom: "10px",
+              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
           >
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              {index < 10 ? `0${index + 1}` : index + 1} {question.content}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
+            <AccordionSummary
+              expandIcon={
+                expanded === `panel${question.id}` ? (
+                  <ExpandLessIcon
+                    sx={{
+                      color:
+                        question.status === "selected" ? "#ffffff" : "#2D3748",
+                    }}
+                  />
+                ) : (
+                  <ExpandMoreIcon
+                    sx={{
+                      color:
+                        question.status === "selected" ? "#ffffff" : "#2D3748",
+                    }}
+                  />
+                )
+              }
+              aria-controls={`panel${question.id}-content`}
+              id={`panel${question.id}-header`}
+              sx={{ padding: "16px" }}
             >
-              {/* <Typography
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                {index < 10 ? `0${index + 1}` : index + 1} {question.content}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                }}
+              >
+                {/* <Typography
                 variant="body2"
                 sx={{ marginBottom: "8px", textAlign: "left" }}
               >
                 {question.content || "No details available."}
               </Typography> */}
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                placeholder="Enter your answer here"
-                variant="outlined"
-                sx={{ marginBottom: "16px" }}
-                value={answerContent}
-                onChange={(e) => setAnswerContent(e.target.value)}
-              />
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  placeholder="Enter your answer here"
+                  variant="outlined"
+                  sx={{ marginBottom: "16px" }}
+                  value={answerContent}
+                  onChange={(e) => setAnswerContent(e.target.value)}
+                />
 
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: "#5A67D8",
-                  color: "#ffffff",
-                  "&:hover": {
-                    backgroundColor: "#4C51BF",
-                  },
-                }}
-                onClick={() => handleAnswerSubmit(question)}
-              >
-                Submit Answer
-              </Button>
-              <Box>
-                <IconButton
-                  onClick={() => handleEdit(question.id)}
-                  sx={{ color: "#2D3748" }}
+                <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#5A67D8",
+                    color: "#ffffff",
+                    "&:hover": {
+                      backgroundColor: "#4C51BF",
+                    },
+                  }}
+                  onClick={() => handleAnswerSubmit(question)}
                 >
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleDelete(question.id)}
-                  sx={{ color: "#2D3748" }}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                  Submit Answer
+                </Button>
+                <Box>
+                  <IconButton
+                    onClick={() => handleEdit(question.id)}
+                    sx={{ color: "#2D3748" }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleDelete(question.id)}
+                    sx={{ color: "#2D3748" }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Box>
               </Box>
-            </Box>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+            </AccordionDetails>
+          </Accordion>
+        ))
+      ) : (
+        <p>THERE IS NO UNANSWERED QUESTION . </p>
+      )}
 
       <Dialog
         open={open}

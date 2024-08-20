@@ -45,6 +45,13 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:3001"; // Địa chỉ Mock API của bạn
+export const fetchAnswers = createAsyncThunk(
+  "answers/fetchAnswers",
+  async () => {
+    const response = await axios.get(`${API_BASE_URL}/answers`);
+    return response.data;
+  }
+);
 
 // Async thunk để thêm câu trả lời mới
 export const addAnswer = createAsyncThunk(
@@ -93,6 +100,17 @@ const answersSlice = createSlice({
         state.items.push(action.payload); // Thêm câu trả lời mới vào danh sách
       })
       .addCase(addAnswer.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(fetchAnswers.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchAnswers.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.items = action.payload;
+      })
+      .addCase(fetchAnswers.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       });

@@ -71,6 +71,13 @@
       "content": "What is your name",
       "isAnswered": true,
       "isDeleted": false
+    },
+    {
+      "id": "8",
+      "userId": "1",
+      "content": "What is your name v2",
+      "isAnswered": true,
+      "isDeleted": true
     }
   ],
   "answers": [
@@ -112,9 +119,9 @@
     },
     {
       "id": "7",
-      "questionId": "7",
+      "questionId": "8",
       "userId": "1",
-      "content": "hello"
+      "content": "123"
     }
   ],
   "likes": [
