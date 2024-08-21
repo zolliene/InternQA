@@ -20,6 +20,18 @@
       "password": "2",
       "role": "Intern",
       "email": "intern02@example.com"
+    },
+    {
+      "id": "cedc",
+      "fullName": "abc",
+      "email": "test2@gmail.com",
+      "password": "123"
+    },
+    {
+      "id": "01df",
+      "fullName": "sylz",
+      "email": "sylz123@gmail.com",
+      "password": "12345"
     }
   ],
   "questions": [
@@ -33,7 +45,7 @@
     {
       "id": "2",
       "userId": 1,
-      "content": "Can someone explain what React Hooks are?",
+      "content": "Can someone explain what React Hooks are??",
       "isAnswered": true,
       "isDeleted": false
     },
@@ -77,6 +89,34 @@
       "userId": "1",
       "content": "What is your name v2",
       "isAnswered": true,
+      "isDeleted": true
+    },
+    {
+      "id": "9",
+      "userId": "2",
+      "content": "what time is it",
+      "isAnswered": false,
+      "isDeleted": true
+    },
+    {
+      "id": "10",
+      "userId": "1",
+      "content": "How do I implement Tailwind?",
+      "isAnswered": false,
+      "isDeleted": true
+    },
+    {
+      "id": "11",
+      "userId": "1",
+      "content": "How does React’s Virtual DOM improve performance compared to direct manipulation of the real DOM??",
+      "isAnswered": false,
+      "isDeleted": false
+    },
+    {
+      "id": "12",
+      "userId": "1",
+      "content": " {/* Add New Question Dialog */}       <Dialog         open={open}         onClose={handleClose}         maxWidth=\"md\"         fullWidth         PaperProps={{           sx: { width: \"450px\", maxWidth: \"none\" },         }}       >         <DialogTitle sx={{ m: 0, p: 2 }}>           Add a New Question           <IconButton             aria-label=\"close\"             onClick={handleClose}             sx={{ position: \"absolute\", right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}           >             <CloseIcon />           </IconButton>         </DialogTitle>         <Formik           initialValues={{ newQuestion: \"\" }}           validationSchema={validationSchema}           onSubmit={handleSubmit}         >           {({ errors, touched }) => (             <Form>               <DialogContent>                 <DialogContentText>                   Please enter your question below:                 </DialogContentText>                 <Field                   as={TextField}                   name=\"newQ",
+      "isAnswered": false,
       "isDeleted": true
     }
   ],
