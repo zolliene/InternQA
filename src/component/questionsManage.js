@@ -26,10 +26,11 @@ import * as Yup from "yup";
 import axios from "axios";
 import API_BASE_URL from "../config";
 import { useDispatch } from "react-redux";
-import { addQuestion, deleteQuestion } from "../features/questionsSlice";
+import { addQuestion } from "../features/questionsSlice";
 
-// Yup validation schema for editing
+// Yup validation schema for adding and editing
 const validationSchema = Yup.object().shape({
+  newQuestion: Yup.string().required("The question field cannot be empty"),
   editQuestion: Yup.string().required("The question field cannot be empty"),
 });
 
@@ -42,16 +43,16 @@ const QuestionsAccordion = ({ questions, answers }) => {
   const [filteredQuestions, setFilteredQuestions] = useState([]);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [hoveredQuestion, setHoveredQuestion] = useState(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    if (user && user.id) {
+    if (user?.id) {
       const userQuestions = questions.filter(
         (question) =>
           parseInt(question.userId) === parseInt(user.id) && !question.isDeleted
       );
-
       setFilteredQuestions(userQuestions);
     }
   }, [questions]);
@@ -60,86 +61,25 @@ const QuestionsAccordion = ({ questions, answers }) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
   const handleEditOpen = (question) => {
     setCurrentQuestion(question);
     setEditOpen(true);
   };
-
-  const handleEditClose = () => {
-    setEditOpen(false);
-  };
-
+  const handleEditClose = () => setEditOpen(false);
   const handleDeleteOpen = (question) => {
     setCurrentQuestion(question);
     setDeleteOpen(true);
   };
-
-  const handleDeleteClose = () => {
-    setDeleteOpen(false);
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  const handleEditSubmit = async (values, { setSubmitting }) => {
-    try {
-      // Gửi yêu cầu cập nhật câu hỏi
-      await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
-        content: values.editQuestion,
-      });
-
-      // Cập nhật danh sách câu hỏi
-      setFilteredQuestions((prevQuestions) =>
-        prevQuestions.map((question) =>
-          question.id === currentQuestion.id
-            ? { ...question, content: values.editQuestion }
-            : question
-        )
-      );
-
-      setSubmitting(false);
-      handleEditClose();
-      setSnackbarMessage("Edit question successful");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error("Failed to update question:", error);
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    try {
-      // Gửi yêu cầu cập nhật câu hỏi thành isDeleted: true
-      await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
-        isDeleted: true,
-      });
-      dispatch(deleteQuestion(currentQuestion.id));
-      // Cập nhật danh sách câu hỏi đã lọc để loại bỏ câu hỏi vừa bị xóa
-      setFilteredQuestions((prevQuestions) =>
-        prevQuestions.filter((question) => question.id !== currentQuestion.id)
-      );
-
-      setDeleteOpen(false);
-      setSnackbarMessage("Delete successful");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.error(`Error deleting question ID ${currentQuestion.id}:`, error);
-    }
-  };
+  const handleDeleteClose = () => setDeleteOpen(false);
+  const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const user = JSON.parse(sessionStorage.getItem("user"));
-      // Gọi hàm addQuestion từ slice Redux và truyền dữ liệu cần thiết
+      console.log("Form Values:", values);
+      console.log(values.newQuestion);
       await dispatch(
         addQuestion({ content: values.newQuestion, userId: user.id })
       );
@@ -149,7 +89,54 @@ const QuestionsAccordion = ({ questions, answers }) => {
       setSnackbarOpen(true);
     } catch (error) {
       console.error("Failed to add question:", error);
+
+      setSnackbarMessage("Failed to add question");
       setSubmitting(false);
+    }
+  };
+
+  const handleEditSubmit = async (values, { setSubmitting }) => {
+    try {
+      console.log("handleEditSubmit triggered"); // Kiểm tra hàm có được gọi không
+      console.log("Current Question ID:", currentQuestion.id); // Kiểm tra ID của câu hỏi
+      console.log("New Content:", values.editQuestion);
+      await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
+        content: values.editQuestion,
+      });
+      setFilteredQuestions((prevQuestions) =>
+        prevQuestions.map((question) =>
+          question.id === currentQuestion.id
+            ? { ...question, content: values.editQuestion }
+            : question
+        )
+      );
+      setSubmitting(false);
+      handleEditClose();
+      setSnackbarMessage("Edit question successful");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Failed to update question:", error);
+      setSubmitting(false);
+      setSnackbarMessage("Failed to update question");
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axios.patch(`${API_BASE_URL}/questions/${currentQuestion.id}`, {
+        isDeleted: true,
+      });
+      setFilteredQuestions((prevQuestions) =>
+        prevQuestions.filter((question) => question.id !== currentQuestion.id)
+      );
+      setDeleteOpen(false);
+      setSnackbarMessage("Delete successful");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error(`Error deleting question ID ${currentQuestion.id}:`, error);
+      setSnackbarMessage("Failed to delete question");
+      setSnackbarOpen(true);
     }
   };
 
@@ -164,6 +151,14 @@ const QuestionsAccordion = ({ questions, answers }) => {
     }
   };
 
+  const handleMouseEnter = (questionId) => {
+    setHoveredQuestion(questionId);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredQuestion(null);
+  };
+
   return (
     <Box sx={{ width: "60%", margin: "auto", paddingTop: "20px" }}>
       <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
@@ -175,26 +170,38 @@ const QuestionsAccordion = ({ questions, answers }) => {
             marginBottom: "20px",
             borderRadius: "8px",
             "&:hover": {
-              backgroundColor: "#b3b8e6",
+              backgroundColor: "#4A55C4",
             },
           }}
           onClick={handleClickOpen}
         >
-          Add new questions
+          Add New Question
         </Button>
       </Box>
+
       {filteredQuestions.map((question, index) => {
-        // Tìm câu trả lời tương ứng với câu hỏi hiện tại
         const relatedAnswers = answers.filter(
           (answer) => parseInt(answer.questionId) === parseInt(question.id)
         );
+        const hasAnswers = relatedAnswers.some(
+          (answer) => answer.content !== null
+        );
+
         return (
           <Accordion
             key={question.id}
             expanded={expanded === `panel${question.id}`}
             onChange={handleChange(`panel${question.id}`)}
+            onMouseEnter={() => handleMouseEnter(question.id)}
+            onMouseLeave={handleMouseLeave}
             sx={{
-              ...getStatusStyles(question.status),
+              ...getStatusStyles(
+                hoveredQuestion === question.id || editOpen || deleteOpen
+                  ? "selected"
+                  : hasAnswers
+                  ? "answered"
+                  : "unanswered"
+              ),
               borderRadius: "16px",
               marginBottom: "10px",
               boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
@@ -206,14 +213,14 @@ const QuestionsAccordion = ({ questions, answers }) => {
                   <ExpandLessIcon
                     sx={{
                       color:
-                        question.status === "selected" ? "#ffffff" : "#2D3748",
+                        hoveredQuestion === question.id ? "#ffffff" : "#2D3748",
                     }}
                   />
                 ) : (
                   <ExpandMoreIcon
                     sx={{
                       color:
-                        question.status === "selected" ? "#ffffff" : "#2D3748",
+                        hoveredQuestion === question.id ? "#ffffff" : "#2D3748",
                     }}
                   />
                 )
@@ -240,8 +247,6 @@ const QuestionsAccordion = ({ questions, answers }) => {
                 >
                   {relatedAnswers.length === 0 ? "No details available." : ""}
                 </Typography>
-
-                {/* Hiển thị tất cả các câu trả lời liên quan */}
                 {relatedAnswers.map((answer) => (
                   <Typography
                     key={answer.id}
@@ -251,7 +256,6 @@ const QuestionsAccordion = ({ questions, answers }) => {
                     <strong>Answer:</strong> {answer.content}
                   </Typography>
                 ))}
-
                 <Box>
                   <IconButton
                     onClick={() => handleEditOpen(question)}
@@ -272,17 +276,14 @@ const QuestionsAccordion = ({ questions, answers }) => {
         );
       })}
 
-      {/* Add New Question */}
+      {/* Add New Question Dialog */}
       <Dialog
         open={open}
         onClose={handleClose}
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: {
-            width: "450px",
-            maxWidth: "none",
-          },
+          sx: { width: "450px", maxWidth: "none" },
         }}
       >
         <DialogTitle sx={{ m: 0, p: 2 }}>
@@ -300,15 +301,18 @@ const QuestionsAccordion = ({ questions, answers }) => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-
         <Formik
           initialValues={{ newQuestion: "" }}
+          // validationSchema={validationSchema}
           validationSchema={Yup.object().shape({
             newQuestion: Yup.string().required(
               "The question field cannot be empty"
             ),
           })}
-          onSubmit={handleSubmit}
+          onSubmit={(values, { setSubmitting }) => {
+            console.log("Formik onSubmit triggered"); // Kiểm tra xem hàm onSubmit có chạy không
+            handleSubmit(values, { setSubmitting });
+          }}
         >
           {({ errors, touched }) => (
             <Form>
@@ -324,23 +328,6 @@ const QuestionsAccordion = ({ questions, answers }) => {
                   variant="outlined"
                   error={touched.newQuestion && !!errors.newQuestion}
                   helperText={touched.newQuestion && errors.newQuestion}
-                  sx={{
-                    marginTop: "16px",
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "#ccc",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#5A67D8",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#5A67D8",
-                      },
-                    },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#5A67D8",
-                    },
-                  }}
                 />
               </DialogContent>
               <DialogActions>
@@ -350,16 +337,11 @@ const QuestionsAccordion = ({ questions, answers }) => {
                   sx={{
                     color: "#5A67D8",
                     "&:hover": {
-                      backgroundColor: "#5A67D8",
+                      backgroundColor: "#4A55C4",
                       color: "white",
                     },
-                    "&:focus": {
-                      backgroundColor: "#5A67D8",
-                    },
-                    "&:active": {
-                      backgroundColor: "#5A67D8",
-                    },
                   }}
+                  onClick={() => console.log("Submit button clicked")} // Kiểm tra nút submit có hoạt động không
                 >
                   Submit
                 </Button>
@@ -369,7 +351,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
         </Formik>
       </Dialog>
 
-      {/* Edit Question */}
+      {/* Edit Question Dialog */}
       {currentQuestion && (
         <Dialog
           open={editOpen}
@@ -377,10 +359,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
           maxWidth="md"
           fullWidth
           PaperProps={{
-            sx: {
-              width: "450px",
-              maxWidth: "none",
-            },
+            sx: { width: "450px", maxWidth: "none" },
           }}
         >
           <DialogTitle sx={{ m: 0, p: 2 }}>
@@ -398,10 +377,13 @@ const QuestionsAccordion = ({ questions, answers }) => {
               <CloseIcon />
             </IconButton>
           </DialogTitle>
-
           <Formik
             initialValues={{ editQuestion: currentQuestion.content }}
-            validationSchema={validationSchema}
+            validationSchema={Yup.object().shape({
+              editQuestion: Yup.string().required(
+                "The question field cannot be empty"
+              ),
+            })}
             onSubmit={handleEditSubmit}
           >
             {({ errors, touched }) => (
@@ -444,14 +426,8 @@ const QuestionsAccordion = ({ questions, answers }) => {
                     sx={{
                       color: "#5A67D8",
                       "&:hover": {
-                        backgroundColor: "#5A67D8",
+                        backgroundColor: "#4A55C4",
                         color: "white",
-                      },
-                      "&:focus": {
-                        backgroundColor: "#5A67D8",
-                      },
-                      "&:active": {
-                        backgroundColor: "#5A67D8",
                       },
                     }}
                   >
@@ -464,7 +440,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
         </Dialog>
       )}
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation Dialog */}
       {currentQuestion && (
         <Dialog
           open={deleteOpen}
@@ -500,6 +476,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
         </Alert>
       </Snackbar>
 
+      {/* Status Legend */}
       <Box sx={{ marginTop: "20px", textAlign: "left" }}>
         <Box
           sx={{ display: "flex", alignItems: "center", marginBottom: "8px" }}
@@ -519,7 +496,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
             variant="body2"
             sx={{ color: "#212121", fontWeight: "bold" }}
           >
-            : selected question
+            : Selected Question
           </Typography>
         </Box>
         <Box
@@ -540,7 +517,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
             variant="body2"
             sx={{ color: "#212121", fontWeight: "bold" }}
           >
-            : answered question
+            : Answered Question
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -560,7 +537,7 @@ const QuestionsAccordion = ({ questions, answers }) => {
             variant="body2"
             sx={{ color: "#212121", fontWeight: "bold" }}
           >
-            : unanswered question
+            : Unanswered Question
           </Typography>
         </Box>
       </Box>
