@@ -9,20 +9,56 @@ import {
     useMediaQuery,
 } from '@mui/material';
 import { Visibility, VisibilityOff, Person, Email, Lock } from '@mui/icons-material';
+import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
 import backgroundImage from '../image/loginBackground.png'; 
-import { Link } from 'react-router-dom';
+import API_BASE_URL from "../config";
 
 const Register = () => {
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
     const isMobile = useMediaQuery('(max-width:600px)'); 
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
     const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+    const handleMouseDownPassword = (event) => event.preventDefault();
 
-    const handleMouseDownPassword = (event) => {
-        event.preventDefault();
+    const handleSubmit = async () => {
+        if (!fullName || !email || !password || !confirmPassword) {
+            setError('All fields are required');
+            return;
+        }
+    
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+    
+        try {
+            const response = await axios.post(`${API_BASE_URL}/users`, {
+                fullName,
+                email,
+                password,
+            });
+    
+            if (response.status === 201) {
+                alert('Registration successful!');
+                navigate('/'); // Redirect to login page
+            } else {
+                setError('Registration failed. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error during registration:', error.response ? error.response.data : error.message);
+            setError('An error occurred. Please try again.');
+        }
     };
+    
 
     return (
         <Box
@@ -59,11 +95,14 @@ const Register = () => {
                 >
                     Create an Account
                 </Typography>
+                {error && <Typography color="error">{error}</Typography>}
                 <TextField
                     fullWidth
                     variant="outlined"
                     label="Full Name"
                     margin="normal"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -78,6 +117,8 @@ const Register = () => {
                     label="Email"
                     margin="normal"
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -92,6 +133,8 @@ const Register = () => {
                     label="Password"
                     margin="normal"
                     type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -117,6 +160,8 @@ const Register = () => {
                     label="Confirm Password"
                     margin="normal"
                     type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -148,6 +193,7 @@ const Register = () => {
                         textTransform: 'none',
                         fontSize: isMobile ? '0.9rem' : '1rem', 
                     }}
+                    onClick={handleSubmit}
                 >
                     Sign up
                 </Button>

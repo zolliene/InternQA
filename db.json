@@ -20,6 +20,18 @@
       "password": "2",
       "role": "Intern",
       "email": "intern02@example.com"
+    },
+    {
+      "id": "cedc",
+      "fullName": "abc",
+      "email": "test2@gmail.com",
+      "password": "123"
+    },
+    {
+      "id": "01df",
+      "fullName": "sylz",
+      "email": "sylz123@gmail.com",
+      "password": "12345"
     }
   ],
   "questions": [
@@ -78,6 +90,34 @@
       "content": "What is your name v2",
       "isAnswered": true,
       "isDeleted": true
+    },
+    {
+      "id": "9",
+      "userId": "1",
+      "content": "what time is it",
+      "isAnswered": true,
+      "isDeleted": false
+    },
+    {
+      "id": "10",
+      "userId": "1",
+      "content": "How do I implement Tailwind?",
+      "isAnswered": false,
+      "isDeleted": false
+    },
+    {
+      "id": "11",
+      "userId": "1",
+      "content": "What is your name v4",
+      "isAnswered": false,
+      "isDeleted": false
+    },
+    {
+      "id": "12",
+      "userId": "1",
+      "content": "helo hihi",
+      "isAnswered": false,
+      "isDeleted": false
     }
   ],
   "answers": [
@@ -122,6 +162,18 @@
       "questionId": "8",
       "userId": "1",
       "content": "123"
+    },
+    {
+      "id": "8",
+      "questionId": "9",
+      "userId": "1",
+      "content": "7:23"
+    },
+    {
+      "id": "9",
+      "questionId": "9",
+      "userId": "1",
+      "content": "7:24"
     }
   ],
   "likes": [
