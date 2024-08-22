@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import LoginPage from "./Pages/login";
@@ -8,6 +8,7 @@ import { Provider } from "react-redux";
 import store from "./app/store";
 import Register from "./Pages/register";
 import FavPage from "./Pages/favPage";
+import LogoutPage from "./Pages/logout"; // Import the Logout component
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/home-page-admin" element={<AdminHomepage />} />
             <Route path="/sign-up" element={<Register />} />
             <Route path="/your-fav" element={<FavPage />} />
+            <Route path="/logout" element={<LogoutPage />} />
           </Routes>
         </div>
       </Router>

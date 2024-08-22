@@ -157,17 +157,17 @@ const QuestionsTab = () => {
         centered
         TabIndicatorProps={{ style: { display: "none" } }}
         sx={{
-          '& .MuiTab-root': {
-            fontWeight: 'bold',
-            color: '#000', // Default text color
-            textAlign: 'center',
-            minWidth: '50%', // Ensure each tab takes up half the width of the container
-            margin: '0 0px',
-            backgroundColor: 'transparent', // Remove background color
-            borderRadius: '8px', // Make the tabs rounded
-            '&.Mui-selected': {
-              backgroundColor: '#5A67D8', // Light blue background for the selected tab
-              color: '#ffffff', // White text color when selected
+          "& .MuiTab-root": {
+            fontWeight: "bold",
+            color: "#000", // Default text color
+            textAlign: "center",
+            minWidth: "50%", // Ensure each tab takes up half the width of the container
+            margin: "0 0px",
+            backgroundColor: "transparent", // Remove background color
+            borderRadius: "8px", // Make the tabs rounded
+            "&.Mui-selected": {
+              backgroundColor: "#5A67D8", // Light blue background for the selected tab
+              color: "#ffffff", // White text color when selected
             },
             "&:hover": {
               backgroundColor: "#b3b8e6", // Slightly darker blue on hover

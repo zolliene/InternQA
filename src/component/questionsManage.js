@@ -46,6 +46,9 @@ const QuestionsAccordion = ({ questions, answers }) => {
   const [hoveredQuestion, setHoveredQuestion] = useState(null);
   const dispatch = useDispatch();
 
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  const isIntern = user?.role === "Intern";
+
   useEffect(() => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     if (user?.id) {
@@ -161,23 +164,25 @@ const QuestionsAccordion = ({ questions, answers }) => {
 
   return (
     <Box sx={{ width: "60%", margin: "auto", paddingTop: "20px" }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#5A67D8",
-            color: "#ffffff",
-            marginBottom: "20px",
-            borderRadius: "8px",
-            "&:hover": {
-              backgroundColor: "#4A55C4",
-            },
-          }}
-          onClick={handleClickOpen}
-        >
-          Add New Question
-        </Button>
-      </Box>
+      {isIntern && (
+        <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+          <Button
+            variant="contained"
+            sx={{
+              backgroundColor: "#5A67D8",
+              color: "#ffffff",
+              marginBottom: "20px",
+              borderRadius: "8px",
+              "&:hover": {
+                backgroundColor: "#4A55C4",
+              },
+            }}
+            onClick={handleClickOpen}
+          >
+            Add New Question
+          </Button>
+        </Box>
+      )}
 
       {filteredQuestions.map((question, index) => {
         const relatedAnswers = answers.filter(
