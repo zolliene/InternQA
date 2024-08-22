@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -6,7 +6,7 @@ import {
   Box,
   Paper,
   IconButton,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
@@ -15,15 +15,18 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import backgroundImage from "../image/loginBackground.png";
 import API_BASE_URL from "../config";
 import axios from "axios";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  useEffect(() => {
+    sessionStorage.removeItem("user");
+  }, []);
   const navigate = useNavigate();
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const isMobile = useMediaQuery("(max-width:600px)");
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
   };
@@ -50,11 +53,15 @@ const LoginPage = () => {
       if (user) {
         // Nếu thông tin đúng, lưu thông tin người dùng vào sessionStorage
         sessionStorage.setItem("user", JSON.stringify(user));
-
-        // Chuyển hướng tới trang khác, ví dụ: Dashboard
-        navigate("/home-page");
+        sessionStorage.setItem("userRole", user.role);
+        sessionStorage.setItem("userId", user.id);
+        if (user.role === "Admin") {
+          navigate("/home-page-admin");
+        } else if (user.role === "Intern") {
+          navigate("/home-page");
+        }
+        console.log(user.role === "Admin");
       } else {
-        // Thông báo lỗi nếu thông tin đăng nhập không chính xác
         alert("Invalid email or password");
       }
     } catch (error) {
@@ -66,41 +73,42 @@ const LoginPage = () => {
   return (
     <Box
       sx={{
-        display: 'flex',
-        height: '100vh',
-        justifyContent: isMobile ? 'center' : 'flex-end',
-        alignItems: 'center',
+        display: "flex",
+        height: "100vh",
+        justifyContent: isMobile ? "center" : "flex-end",
+        alignItems: "center",
         backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        paddingRight: isMobile ? '0.5rem' : '5%',
-        paddingLeft: isMobile ? '0.5rem' : '0',
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        paddingRight: isMobile ? "0.5rem" : "5%",
+        paddingLeft: isMobile ? "0.5rem" : "0",
       }}
     >
       <Paper
         elevation={3}
         sx={{
-          display: 'flex',
-          width: isMobile ? '100%' : '40%',
-          height: isMobile ? 'auto' : '80%',
-          borderRadius: isMobile ? '0' : '10px',
-          overflow: 'hidden',
+          display: "flex",
+          width: isMobile ? "100%" : "40%",
+          height: isMobile ? "auto" : "80%",
+          borderRadius: isMobile ? "0" : "10px",
+          overflow: "hidden",
         }}
       >
         <Box
           sx={{
             flex: 1,
-            backgroundColor: '#ffffff',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: isMobile ? 'center' : 'flex-start',
-            padding: isMobile ? '1rem' : '2rem',
-            textAlign: isMobile ? 'center' : 'left',
+            backgroundColor: "#ffffff",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: isMobile ? "center" : "flex-start",
+            padding: isMobile ? "1rem" : "2rem",
+            textAlign: isMobile ? "center" : "left",
           }}
         >
-          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 4 }}>
-            Welcome to <br /><span style={{ color: '#3f51b5' }}>Amazing Tech</span>
+          <Typography variant="h3" sx={{ fontWeight: "bold", mb: 4 }}>
+            Welcome to <br />
+            <span style={{ color: "#3f51b5" }}>Amazing Tech</span>
           </Typography>
           <TextField
             fullWidth
@@ -145,7 +153,9 @@ const LoginPage = () => {
           </Button>
           <Typography variant="body2" sx={{ mt: 2 }}>
             Don’t have an account? &nbsp;
-            <Link to="sign-up" style={{ color: '#3f51b5' }}>Sign up</Link>
+            <Link to="sign-up" style={{ color: "#3f51b5" }}>
+              Sign up
+            </Link>
           </Typography>
         </Box>
       </Paper>
